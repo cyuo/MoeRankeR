@@ -11,7 +11,7 @@ interface RouteParams {
 }
 
 // GET /api/a/traits/[id] - 获取单个萌属性
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_TRAITS_ID_GET] 开始处理请求');
     
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/a/traits/[id] - 更新萌属性
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { user, session } = await validateRequest();
     if (!session) {
@@ -115,14 +115,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       for (const subsetId of affectedSubsetIds) {
         const subset = await Subset.findById(subsetId).lean();
         if (!subset) continue;
-        const characterIds = subset.characters || [];
+        const characterIds = (subset as unknown as import('@/models/Subset').ISubset).characters || [];
         const charactersFromDB = await Character.find({ _id: { $in: characterIds } })
           .populate('traits')
           .lean();
         const formattedCharacters: Record<string, any> = {};
         const imageMapping: Record<string, string[]> = {};
         for (const char of charactersFromDB) {
-          const charIdStr = char._id.toString();
+          const charIdStr = String(char._id);
           const characterTraitsData: Record<string, { score: number; moegirl_link?: string }> = {};
           if (char.traits && Array.isArray(char.traits)) {
             char.traits.forEach((traitDoc: any) => {
@@ -158,7 +158,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       for (const subset of allSubsets) {
         const subsetData = subset as any;
         const subsetId = subsetData._id.toString();
-        const characterIds = subsetData.characters || [];
+        const characterIds = (subset as unknown as import('@/models/Subset').ISubset).characters || [];
         let femaleCount = 0;
         let withImageCount = 0;
         if (characterIds.length > 0) {
@@ -168,7 +168,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           });
           const withImageCharCount = await Character.countDocuments({
             _id: { $in: characterIds },
-            image_url: { $exists: true, $ne: null, $ne: '' }
+            image_url: { $exists: true, $ne: null }
           });
           femaleCount = femaleCharCount;
           withImageCount = withImageCharCount;
@@ -199,7 +199,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/a/traits/[id] - 删除萌属性
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { user, session } = await validateRequest();
     if (!session) {

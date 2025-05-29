@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
@@ -29,9 +29,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const captchaRef = useRef<any>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setError(null);
 
     if (!username || !password) {
@@ -44,20 +46,21 @@ export default function LoginPage() {
     }
 
     try {
-      setLoading(true);
-      const response = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password, captchaToken }),
-        credentials: 'include',
       });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || '登录失败');
+      const data = await res.json();
+      if (!data.success) {
+        setError(data.message || '登录失败');
+        if (captchaRef.current) captchaRef.current.resetCaptcha();
+        setCaptchaToken(null);
+      } else {
+        const redirectTo = safeSearchParams.get('redirectTo');
+        router.push(redirectTo || '/');
+        router.refresh();
       }
-      const redirectTo = safeSearchParams.get('redirectTo');
-      router.push(redirectTo || '/');
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录过程中发生错误');
     } finally {

@@ -12,7 +12,7 @@ interface RouteParams {
 }
 
 // GET /api/a/subsets/[id] - 获取单个分组
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_SUBSETS_ID_GET] 开始处理请求');
     
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/a/subsets/[id] - 更新分组
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_SUBSETS_ID_PUT] 开始处理请求');
     
@@ -126,7 +126,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           });
           const withImageCharCount = await Character.countDocuments({
             _id: { $in: characterIds },
-            image_url: { $exists: true, $ne: null, $ne: '' }
+            image_url: { $exists: true, $ne: null }
           });
           femaleCount = femaleCharCount;
           withImageCount = withImageCharCount;
@@ -156,7 +156,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/a/subsets/[id] - 删除分组
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_SUBSETS_ID_DELETE] 开始处理请求');
     
@@ -210,7 +210,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
           });
           const withImageCharCount = await Character.countDocuments({
             _id: { $in: characterIds },
-            image_url: { $exists: true, $ne: null, $ne: '' }
+            image_url: { $exists: true, $ne: null }
           });
           femaleCount = femaleCharCount;
           withImageCount = withImageCharCount;

@@ -13,7 +13,7 @@ interface RouteParams {
 }
 
 // GET /api/a/char/[id] - 获取单个角色
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_CHAR_ID_GET] 开始处理请求:', params);
     const { user, session } = await validateRequest();
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/a/char/[id] - 更新角色
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_CHAR_ID_PUT] 开始处理请求:', params);
     const { user, session } = await validateRequest();
@@ -122,7 +122,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const formattedCharacters: Record<string, any> = {};
         const imageMapping: Record<string, string[]> = {};
         for (const char of charactersFromDB) {
-          const charIdStr = char._id.toString();
+          const charIdStr = String(char._id);
           const characterTraitsData: Record<string, { score: number; moegirl_link?: string }> = {};
           if (char.traits && Array.isArray(char.traits)) {
             char.traits.forEach((traitDoc: any) => {
@@ -168,7 +168,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           });
           const withImageCharCount = await Character.countDocuments({
             _id: { $in: characterIds },
-            image_url: { $exists: true, $ne: null, $ne: '' }
+            image_url: { $exists: true, $ne: null }
           });
           femaleCount = femaleCharCount;
           withImageCount = withImageCharCount;
@@ -199,7 +199,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/a/char/[id] - 删除角色
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_CHAR_ID_DELETE] 开始处理请求:', params);
     const { user, session } = await validateRequest();
@@ -238,7 +238,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         const formattedCharacters: Record<string, any> = {};
         const imageMapping: Record<string, string[]> = {};
         for (const char of charactersFromDB) {
-          const charIdStr = char._id.toString();
+          const charIdStr = String(char._id);
           const characterTraitsData: Record<string, { score: number; moegirl_link?: string }> = {};
           if (char.traits && Array.isArray(char.traits)) {
             char.traits.forEach((traitDoc: any) => {
@@ -284,7 +284,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
           });
           const withImageCharCount = await Character.countDocuments({
             _id: { $in: characterIds },
-            image_url: { $exists: true, $ne: null, $ne: '' }
+            image_url: { $exists: true, $ne: null }
           });
           femaleCount = femaleCharCount;
           withImageCount = withImageCharCount;

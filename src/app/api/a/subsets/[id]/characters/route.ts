@@ -12,7 +12,7 @@ interface RouteParams {
 }
 
 // GET /api/a/subsets/[id]/characters - 获取分组中的角色
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     console.log('[API_A_SUBSETS_ID_CHARACTERS_GET] 开始处理请求');
     

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { getDatabase, getCollection } from '../scripts/mongo-utils'; // Adjusted to import getCollection as well
-import { validateCaptcha } from './captcha'; // 确保路径正确
+import { verifyCaptcha } from '@/lib/captcha';
 
 /**
  * 生成随机会话ID (使用Node.js crypto)
@@ -60,9 +60,9 @@ export async function createUser(
 ): Promise<{ success: boolean; message: string; userId?: any }> { // userId 类型会是 MongoDB ObjectID
   try {
     // 1. 验证hCaptcha
-    const captchaValid = await validateCaptcha(captchaToken, clientIP);
-    if (!captchaValid) {
-      return { success: false, message: '验证码验证失败' };
+    const captchaResult = await verifyCaptcha(captchaToken, clientIP);
+    if (!captchaResult.success) {
+      return { success: false, message: captchaResult.message || '验证码验证失败' };
     }
 
     // 2. 验证注册码

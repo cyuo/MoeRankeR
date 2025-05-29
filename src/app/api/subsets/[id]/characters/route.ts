@@ -25,21 +25,21 @@ interface PopulatedCharacter {
 }
 
 // GET /api/subsets/[id]/characters - 获取指定分组的所有角色数据
-export async function GET(request: NextRequest, { params }: RouteParams) {
-  // hCaptcha 校验
-  const captchaToken = request.headers.get('x-captcha-token');
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : undefined;
-  const captchaValidation = await verifyCaptcha(captchaToken, clientIp);
-  if (!captchaValidation.success) {
-    return NextResponse.json({ error: captchaValidation.message || 'CAPTCHA verification failed' }, { status: 400 });
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  // 校验临时 session token
+  const sessionToken = request.headers.get('x-captcha-session');
+  const redis = getRedisClient();
+  if (!sessionToken) {
+    return NextResponse.json({ error: '缺少人机验证凭证' }, { status: 401 });
+  }
+  const exists = await redis.get(`captcha_session:${sessionToken}`);
+  if (!exists) {
+    return NextResponse.json({ error: '人机验证已过期或无效，请刷新页面重试' }, { status: 401 });
   }
 
   // 先 await params
   const resolvedParams = await params;
   const { id } = resolvedParams;
-
-  const redis = getRedisClient();
   const cacheKey = `subset_${id}_characters`;
   const cached = await redis.get(cacheKey);
   if (cached) {

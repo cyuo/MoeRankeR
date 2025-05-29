@@ -1,5 +1,5 @@
 
-# MoeRanker
+# MoeRankeR
 
 Moe attribute sorter
 

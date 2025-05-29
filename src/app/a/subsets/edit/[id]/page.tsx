@@ -61,15 +61,13 @@ async function getSubset(id: string): Promise<SimpleSubset | null> {
   }
 }
 
-export default async function EditSubsetPage({ params }: PageProps) {
-  const { user, session } = await validateRequest();
-  if (!session) {
-    redirect(`/u/login?redirectTo=/a/subsets/edit/${params.id}`);
-  }
-
-  // 先解析params
+export default async function EditSubsetPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
+  const { user, session } = await validateRequest();
+  if (!session) {
+    redirect(`/u/login?redirectTo=/a/subsets/edit/${id}`);
+  }
 
   if (!id) {
     console.log('[调试] 缺少ID参数');

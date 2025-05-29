@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
           // 查询该分组中有图片的角色数量
           const withImageCharCount = await Character.countDocuments({
             _id: { $in: characterIds },
-            image_url: { $exists: true, $ne: null, $ne: '' }
+            image_url: { $exists: true, $ne: null }
           });
           
           femaleCount = femaleCharCount;
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         });
         const withImageCharCount = await Character.countDocuments({
           _id: { $in: characterIds },
-          image_url: { $exists: true, $ne: null, $ne: '' }
+          image_url: { $exists: true, $ne: null }
         });
         femaleCount = femaleCharCount;
         withImageCount = withImageCharCount;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Paper, Grid, Box, Button, Stepper, Step, StepLabel } from '@mui/material';
 import SubsetSelector from '@/components/SubsetSelector';
 import CharacterRater from '@/components/CharacterRater';
@@ -34,6 +34,8 @@ export default function Home() {
 
   const [loadingCharacters, setLoadingCharacters] = useState(false);
 
+  const captchaRef = useRef<any>(null);
+
   // 加载数据
   useEffect(() => {
     const loadInitialData = async () => {
@@ -61,94 +63,63 @@ export default function Home() {
     loadInitialData();
   }, []);
 
-  // 只有在 activeStep === 1 时拉角色数据
-  useEffect(() => {
-    if (activeStep !== 1) return;
-    const loadCharacterData = async () => {
-      setLoadingCharacters(true);
-      if (selectedSubsets.length === 0) {
-        setCharacters({});
-        setMapping({});
-        setLoadingCharacters(false);
-        return;
-      }
-      try {
-        let token = captchaToken;
-        if (!token && typeof window !== 'undefined') {
-          token = localStorage.getItem('moeranker_captcha_token');
-        }
-        if (!token) {
-          setActiveStep(0);
-          setCaptchaOpen(true);
-          setLoadingCharacters(false);
-          return;
-        }
-        const characterDataPromises = selectedSubsets.map(subsetId =>
-          fetch(`/api/subsets/${subsetId}/characters`, {
-            headers: { 'X-Captcha-Token': token }
-          }).then(res => {
-            if (res.status === 400 || res.status === 401) throw new Error('人机验证已失效，请重新验证');
-            return res.json();
-          })
-        );
-        const results = await Promise.all(characterDataPromises);
-        const mergedCharacters: Record<string, Character> = {};
-        const mergedMapping: Record<string, string[]> = {};
-        results.forEach(result => {
-          Object.entries(result.characters).forEach(([charId, charData]) => {
-            if (!mergedCharacters[charId]) {
-              mergedCharacters[charId] = charData as Character;
-            } else {
-              const existingTraits = mergedCharacters[charId].traits || {};
-              const newTraits = (charData as Character).traits || {};
-              mergedCharacters[charId].traits = { ...existingTraits, ...newTraits };
-            }
-          });
-          Object.entries(result.mapping).forEach(([charId, imageUrls]) => {
-            if (!mergedMapping[charId]) {
-              mergedMapping[charId] = imageUrls as string[];
-            } else {
-              const existingUrls = new Set(mergedMapping[charId]);
-              (imageUrls as string[]).forEach(url => {
-                if (!existingUrls.has(url)) {
-                  mergedMapping[charId].push(url);
-                }
-              });
-            }
-          });
-        });
-        setCharacters(mergedCharacters);
-        setMapping(mergedMapping);
-        setLoadingCharacters(false);
-      } catch (error: any) {
-        setLoadingCharacters(false);
-        if (error.message && error.message.includes('人机验证')) {
-          setCaptchaError(error.message);
-          setCaptchaToken(null);
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('moeranker_captcha_token');
+  // 拉取角色数据的函数
+  const fetchCharactersWithSessionToken = async (sessionToken: string) => {
+    setLoadingCharacters(true);
+    try {
+      const characterDataPromises = selectedSubsets.map(subsetId =>
+        fetch(`/api/subsets/${subsetId}/characters`, {
+          headers: { 'x-captcha-session': sessionToken }
+        }).then(res => {
+          if (res.status === 400 || res.status === 401) throw new Error('人机验证已失效，请重新验证');
+          return res.json();
+        })
+      );
+      const results = await Promise.all(characterDataPromises);
+      const mergedCharacters: Record<string, Character> = {};
+      const mergedMapping: Record<string, string[]> = {};
+      results.forEach(result => {
+        Object.entries(result.characters).forEach(([charId, charData]) => {
+          if (!mergedCharacters[charId]) {
+            mergedCharacters[charId] = charData as Character;
+          } else {
+            const existingTraits = mergedCharacters[charId].traits || {};
+            const newTraits = (charData as Character).traits || {};
+            mergedCharacters[charId].traits = { ...existingTraits, ...newTraits };
           }
-          setActiveStep(0);
-          setCaptchaOpen(true);
-        } else {
-          console.error('加载角色数据失败:', error);
-        }
+        });
+        Object.entries(result.mapping).forEach(([charId, imageUrls]) => {
+          if (!mergedMapping[charId]) {
+            mergedMapping[charId] = imageUrls as string[];
+          } else {
+            const existingUrls = new Set(mergedMapping[charId]);
+            (imageUrls as string[]).forEach(url => {
+              if (!existingUrls.has(url)) {
+                mergedMapping[charId].push(url);
+              }
+            });
+          }
+        });
+      });
+      setCharacters(mergedCharacters);
+      setMapping(mergedMapping);
+      setLoadingCharacters(false);
+      setActiveStep(1);
+    } catch (error: any) {
+      setLoadingCharacters(false);
+      setCaptchaToken(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('moeranker_captcha_token');
       }
-    };
-    loadCharacterData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeStep, selectedSubsets]);
-
-  // 保存评分和评分历史到 localStorage
-  useEffect(() => {
-    if (Object.keys(ratings).length > 0) {
-      localStorage.setItem('moeranker_ratings', JSON.stringify(ratings));
+      setActiveStep(0);
+      setCaptchaOpen(true);
+      setCaptchaError(error.message || '人机验证已失效，请重新验证');
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+        captchaRef.current.execute();
+      }
     }
-    
-    if (ratingHistory.length > 0) {
-      localStorage.setItem('moeranker_history', JSON.stringify(ratingHistory));
-    }
-  }, [ratings, ratingHistory]);
+  };
 
   // 处理子集选择
   const handleSubsetsChange = (newSelectedSubsets: string[]) => {
@@ -481,7 +452,7 @@ export default function Home() {
         alert('请至少选择一个分组');
         return;
       }
-      // 检查localStorage有无token，无则弹窗，有则直接进入评分
+      // 检查localStorage有无token，无则弹窗，有则直接拉取数据
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('moeranker_captcha_token');
         if (!token) {
@@ -489,8 +460,8 @@ export default function Home() {
           return;
         }
         setCaptchaToken(token);
+        fetchCharactersWithSessionToken(token);
       }
-      setActiveStep(1);
       return;
     }
     if (activeStep === 1) {
@@ -505,14 +476,30 @@ export default function Home() {
   };
 
   // hCaptcha 验证通过
-  const handleCaptchaVerify = (token: string) => {
-    setCaptchaToken(token);
-    setCaptchaOpen(false);
-    setCaptchaError(null);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('moeranker_captcha_token', token);
+  const handleCaptchaVerify = async (token: string) => {
+    try {
+      // 用 hCaptcha token 换取 session token
+      const res = await fetch('/api/captcha/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captchaToken: token }),
+      });
+      const data = await res.json();
+      if (data.success && data.sessionToken) {
+        setCaptchaToken(data.sessionToken);
+        setCaptchaOpen(false);
+        setCaptchaError(null);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('moeranker_captcha_token', data.sessionToken);
+        }
+        // 直接拉取角色数据
+        await fetchCharactersWithSessionToken(data.sessionToken);
+      } else {
+        setCaptchaError(data.message || '人机验证失败，请重试');
+      }
+    } catch (err) {
+      setCaptchaError('人机验证失败，请重试');
     }
-    setActiveStep(1);
   };
 
   // hCaptcha 失败/过期
@@ -638,6 +625,7 @@ export default function Home() {
               <Typography variant="h6" sx={{ mb: 2 }}>请完成人机验证</Typography>
               {captchaError && <Typography color="error" sx={{ mb: 2 }}>{captchaError}</Typography>}
               <HCaptcha
+                ref={captchaRef}
                 sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || '10000000-ffff-ffff-ffff-000000000001'}
                 onVerify={handleCaptchaVerify}
                 onError={() => handleCaptchaError('error')}

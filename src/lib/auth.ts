@@ -82,6 +82,7 @@ export const lucia = new Lucia(adapter, {
         attributes: {
             // set to `true` when using HTTPS
             secure: process.env.NODE_ENV === 'production',
+            domain: process.env.COOKIE_DOMAIN || undefined,
         },
     },
     sessionExpiresIn: new TimeSpan(30, 'd'), // 会话有效期，例如30天

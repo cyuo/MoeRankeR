@@ -107,7 +107,7 @@ export default function SubsetCharsClientForm({ subset }: SubsetCharsClientFormP
     
     try {
       // 假设我们有一个API端点可以搜索角色
-      const res = await fetch(`/api/a/char?search=${encodeURIComponent(searchTerm)}&limit=5`);
+      const res = await fetch(`/api/a/char?search=${encodeURIComponent(searchTerm)}&limit=1000`);
       
       if (!res.ok) {
         throw new Error('搜索角色失败');

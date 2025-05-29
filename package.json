@@ -5,6 +5,7 @@
   "description": "Moe attribute sorter",
   "scripts": {
     "dev": "npx next dev",
+    "build": "npx next build",
     "start": "npx next start",
     "lint": "npx next lint"
   },
@@ -46,9 +47,12 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/cyuo/MoeRanker/issues"
   },
-  "homepage": "https://github.com/cyuo/MoeRanker#readme"
+  "homepage": "https://github.com/cyuo/MoeRanker#readme",
+  "engines": {
+    "node": "22.x"
+  }
 }

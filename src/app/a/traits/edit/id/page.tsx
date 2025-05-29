@@ -68,16 +68,12 @@ async function getTrait(
   }
 }
 
-export default async function EditTraitPage({ searchParams: initialSearchParams }: PageProps) {
-  // 确保 searchParams 已"解析" （对于页面 props 通常是即时可用的）
-  // 将其赋值给一个新常量，以便在整个函数中一致地使用它
-  const searchParams = initialSearchParams;
+export default async function EditTraitPage({ searchParams }: { searchParams?: Promise<{ id?: string }> }) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const currentId = resolvedSearchParams.id;
 
   const { user, session } = await validateRequest();
   
-  // 从 searchParams 中获取 id，并存储在一个变量中
-  const currentId = searchParams?.id;
-
   if (!session) {
     // 在重定向URL中使用 currentId (如果存在)
     redirect(`/u/login?redirectTo=/a/traits/edit/id?id=${currentId || ''}`);

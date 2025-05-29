@@ -77,7 +77,10 @@ let redis: Redis | null = null;
 
 export function getRedisClient() {
   if (!redis) {
-    redis = new Redis(process.env.REDIS_URL as string);
+    const redisUrl = process.env.REDIS_URL as string;
+    const url = new URL(redisUrl);
+    url.searchParams.set('family', '0');
+    redis = new Redis(url.toString());
   }
   return redis;
 }

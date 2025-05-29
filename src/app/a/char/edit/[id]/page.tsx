@@ -14,10 +14,7 @@ export const revalidate = 0;
 
 export default async function EditCharacterPage({
   params
-}: {
-  params: { id: string }
-}) {
-  // 在NextJS 15中，动态参数必须在使用前await
+}: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
   

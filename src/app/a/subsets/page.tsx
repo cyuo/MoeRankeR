@@ -16,17 +16,19 @@ function ClientWrapper() {
 export default async function AdminSubsetsServerPage({ 
   searchParams
 }: {
-  searchParams?: { 
+  searchParams?: Promise<{ 
     page?: string; 
     limit?: string; 
     search?: string; 
-  }
+  }>
 }) {
   const { user, session } = await validateRequest();
   if (!session) {
     redirect('/u/login?redirectTo=/a/subsets');
   }
   
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'; // Import cookies
 export async function POST(req: NextRequest) { // Lucia v3 examples often use POST for logout
     try {
         // Correctly get cookies
-        const cookieStore = cookies(); // Get the cookie store
+        const cookieStore = await cookies(); // Get the cookie store
         const sessionId = cookieStore.get(lucia.sessionCookieName)?.value ?? null;
 
         if (!sessionId) {

@@ -12,22 +12,24 @@ import AddIcon from '@mui/icons-material/Add';
 import ClientWrapper from './ClientWrapper';
 
 // 强制使用动态渲染，确保路由参数可用
-export const dynamicParams = 'force-dynamic' as const;
+export const dynamicParams = true;
 
 export default async function AdminTraitsServerPage({ 
   searchParams
 }: {
-  searchParams?: { 
+  searchParams?: Promise<{ 
     page?: string; 
     limit?: string; 
     search?: string; 
-  }
+  }>
 }) {
   const { user, session } = await validateRequest();
   if (!session) {
     redirect('/u/login?redirectTo=/a/traits');
   }
   
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>

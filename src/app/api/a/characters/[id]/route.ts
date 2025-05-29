@@ -7,8 +7,10 @@ import mongoose from 'mongoose';
 // GET - 获取单个角色
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
   try {
     // 验证会话
     const { user, session } = await validateRequest();
@@ -20,7 +22,6 @@ export async function GET(
     await dbConnect();
 
     // 验证ID格式
-    const { id } = params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: '无效的角色ID' }, { status: 400 });
     }
@@ -48,8 +49,10 @@ export async function GET(
 // PUT - 更新角色
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
   try {
     // 验证会话
     const { user, session } = await validateRequest();
@@ -61,7 +64,6 @@ export async function PUT(
     await dbConnect();
 
     // 验证ID格式
-    const { id } = params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: '无效的角色ID' }, { status: 400 });
     }
@@ -118,8 +120,10 @@ export async function PUT(
 // DELETE - 删除角色
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const resolvedParams = await params;
+  const { id } = resolvedParams;
   try {
     // 验证会话
     const { user, session } = await validateRequest();
@@ -131,7 +135,6 @@ export async function DELETE(
     await dbConnect();
 
     // 验证ID格式
-    const { id } = params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ message: '无效的角色ID' }, { status: 400 });
     }

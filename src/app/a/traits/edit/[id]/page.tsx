@@ -14,47 +14,15 @@ import Trait from "@/models/Trait";
 import dbConnect from "@/lib/dbConnect";
 import mongoose from "mongoose";
 
-interface PageProps {
-  params: { id: string };
-}
-
-async function getTrait(
-  id: string,
-): Promise<(ITrait & { _id: string }) | null> {
-  console.log(`[调试] 正在从数据库获取萌属性: ${id}`);
-  
-  try {
-    // 直接从数据库获取数据
-    await dbConnect();
-    
-    // 验证ID格式
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      console.error(`[调试] 无效的ID格式: ${id}`);
-      return null;
-    }
-    
-    const trait = await Trait.findById(id).lean();
-    
-    if (!trait) {
-      console.log('[调试] 数据库中未找到萌属性');
-      return null;
-    }
-    
-    console.log('[调试] 成功从数据库获取萌属性');
-    return trait as (ITrait & { _id: string });
-  } catch (error) {
-    console.error('[调试] 数据库查询异常:', error);
-    throw new Error('获取萌属性数据失败');
-  }
-}
-
-export default async function EditTraitPage({ params }: PageProps) {
+export default async function EditTraitPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
   const { user, session } = await validateRequest();
   if (!session) {
-    redirect(`/u/login?redirectTo=/a/traits/edit/${params.id}`);
+    redirect(`/u/login?redirectTo=/a/traits/edit/${id}`);
   }
 
-  const trait = await getTrait(params.id);
+  const trait = await getTrait(id);
 
   if (!trait) {
     return (
@@ -90,4 +58,34 @@ export default async function EditTraitPage({ params }: PageProps) {
       </Paper>
     </Container>
   );
+}
+
+async function getTrait(
+  id: string,
+): Promise<(ITrait & { _id: string }) | null> {
+  console.log(`[调试] 正在从数据库获取萌属性: ${id}`);
+  
+  try {
+    // 直接从数据库获取数据
+    await dbConnect();
+    
+    // 验证ID格式
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.error(`[调试] 无效的ID格式: ${id}`);
+      return null;
+    }
+    
+    const trait = await Trait.findById(id).lean();
+    
+    if (!trait) {
+      console.log('[调试] 数据库中未找到萌属性');
+      return null;
+    }
+    
+    console.log('[调试] 成功从数据库获取萌属性');
+    return trait as unknown as (ITrait & { _id: string });
+  } catch (error) {
+    console.error('[调试] 数据库查询异常:', error);
+    throw new Error('获取萌属性数据失败');
+  }
 }

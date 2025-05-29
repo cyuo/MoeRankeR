@@ -13,7 +13,7 @@ interface RouteParams {
 }
 
 // PUT /api/a/subsets/[id]/characters/[characterId] - 添加角色到分组
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string; characterId: string }> }) {
   try {
     console.log('[API_A_SUBSETS_ID_CHARACTER_ID_PUT] 开始处理请求');
     
@@ -86,7 +86,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/a/subsets/[id]/characters/[characterId] - 从分组中移除角色
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string; characterId: string }> }) {
   try {
     console.log('[API_A_SUBSETS_ID_CHARACTER_ID_DELETE] 开始处理请求');
     
