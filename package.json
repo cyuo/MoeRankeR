@@ -1,0 +1,54 @@
+{
+  "name": "moeranker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Moe attribute sorter",
+  "scripts": {
+    "dev": "npx next dev",
+    "start": "npx next start",
+    "lint": "npx next lint"
+  },
+  "dependencies": {
+    "@hcaptcha/react-hcaptcha": "^1.12.0",
+    "@lucia-auth/adapter-mongodb": "^1.0.3",
+    "@types/ioredis": "^4.28.10",
+    "dotenv": "^16.5.0",
+    "ioredis": "^5.6.1",
+    "lucia": "^3.2.2",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.15.1",
+    "oslo": "^1.2.1",
+    "react-hook-form": "^7.56.4"
+  },
+  "devDependencies": {
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/server": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.12",
+    "@mui/material": "^5.15.12",
+    "@mui/material-nextjs": "^7.1.0",
+    "@types/cookie": "^0.6.0",
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "^14.1.3",
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyuo/MoeRanker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cyuo/MoeRanker/issues"
+  },
+  "homepage": "https://github.com/cyuo/MoeRanker#readme"
+}
