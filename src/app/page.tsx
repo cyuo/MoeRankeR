@@ -79,7 +79,7 @@ export default function Home() {
       const mergedCharacters: Record<string, Character> = {};
       const mergedMapping: Record<string, string[]> = {};
       results.forEach(result => {
-        Object.entries(result.characters).forEach(([charId, charData]) => {
+        Object.entries(result.characters || {}).forEach(([charId, charData]) => {
           if (!mergedCharacters[charId]) {
             mergedCharacters[charId] = charData as Character;
           } else {
@@ -88,7 +88,7 @@ export default function Home() {
             mergedCharacters[charId].traits = { ...existingTraits, ...newTraits };
           }
         });
-        Object.entries(result.mapping).forEach(([charId, imageUrls]) => {
+        Object.entries(result.mapping || {}).forEach(([charId, imageUrls]) => {
           if (!mergedMapping[charId]) {
             mergedMapping[charId] = imageUrls as string[];
           } else {

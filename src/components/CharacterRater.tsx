@@ -216,38 +216,6 @@ export default function CharacterRater({
   }, [selectedSubsets, subsets, characters, mapping, imageOnly, selectedGenders]);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const importanceResponse = await fetch('/data/importance.json');
-        if (importanceResponse.ok) {
-          const loadedImportanceData = await importanceResponse.json();
-          setImportanceData(loadedImportanceData);
-          console.log('[CharacterRater] 已加载萌属性重要性数据:', Object.keys(loadedImportanceData).length);
-        }
-        
-        const linksResponse = await fetch('/data/trait_links.json');
-        if (linksResponse.ok) {
-          const loadedLinksData = await linksResponse.json();
-          setTraitLinks(loadedLinksData);
-          console.log('[CharacterRater] 已加载萌属性链接数据:', Object.keys(loadedLinksData).length);
-        }
-        
-        // Gender types are now from GENDER_NAMES directly, no need to fetch
-        // const genderTypesResponse = await fetch('/data/gender_types.json');
-        // if (genderTypesResponse.ok) {
-        //   const genderTypesData = await genderTypesResponse.json();
-        //   setGenderTypes(genderTypesData);
-        //   console.log('[CharacterRater] 已加载性别类型数据');
-        // }
-      } catch (error) {
-        console.error('[CharacterRater] 加载数据失败:', error);
-      }
-    };
-    
-    loadData();
-  }, []);
-
-  useEffect(() => {
     console.log('[CharacterRater] selectedSubsets changed:', selectedSubsets);
     setCurrentCharacter(null);
     setAllRated(false);
